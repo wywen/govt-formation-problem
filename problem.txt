@@ -1,0 +1,31 @@
+INTRODUCTION
+
+Imagine you are a political party that wants to form the government of Singapore after a single election. However, your party is extremely lazy and you wish to put in the bare minimum of effort to achieve this goal.
+
+Singapore's electoral system however, is different from most systems in the world. Some things a pretty standard, the country is divided into districts, which gives whichever party that wins it seats. The party that wins a simple majority of seats gets to form the government. Each district has a first past the post system. In order to win the district, you must win more votes than any other party contesting the area. Not all districts have the same number of voters, and like in many other places, how the electoral boundaries are drawn and what they supposedly signify is a complete mystery. All I know is that they change every election, and my house has been in a different district in every election.
+
+What is unique however, is that there are districts which gives more than one seat. These are known as Group Representation Councils (GRCs). Instead of electing a single candidate, you have to pick a group of three or more of them. Normal districts that give a party only one seat are called Single Member Constituencies (SMCs).
+
+This little problem is based on the goals outlined broadly in:
+http://dontneedsex.blogspot.sg/2013/05/how-to-become-next-government-of.html
+
+PROBLEM DEFINITION
+
+You are given an electoral map, the map consists of districts:
+As a lazy party you are interested only in a few facts about each district, largely: 
+The number of voters and the number of seats each district has.
+
+You want to form the government, so you need a simple majority of seats.
+
+There are a couple of additional constraints:
+1) You either win the entire district or you don't. You can't win half a district.
+2) If you win a district, you can only do it at most once.
+
+You are lazy, so you wish to put in less effort. Now, this is vaguely defined, but for now, let's just say you want to minimize the number
+of districts you contest. We will talk about the other 'tougher' objective minimization measure later.
+
+The obvious solution to minimizing the number of districts contested is to go for a greedy approach. Just pick the districts with the most seats first and progressively fill it in with smaller and smaller districts until the threshold for government formation is reached.
+
+This algorithm should be optimal.
+
+A more challenging problem would be to minimize the number of votes you have to win. For this you need to introduce a cost function.
