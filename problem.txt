@@ -1,31 +1,139 @@
 INTRODUCTION
 
-Imagine you are a political party that wants to form the government of Singapore after a single election. However, your party is extremely lazy and you wish to put in the bare minimum of effort to achieve this goal.
+Imagine we are a political party that wants to form the government of Singapore after a single election. However, our party is extremely lazy (but inclined towards computer science, go figure) and you wish to put in the bare minimum of effort to achieve this goal. Let's assume that our party has access to some MIB mind control device which allows us to automatically win whatever district they desire.
 
 Singapore's electoral system however, is different from most systems in the world. Some things a pretty standard, the country is divided into districts, which gives whichever party that wins it seats. The party that wins a simple majority of seats gets to form the government. Each district has a first past the post system. In order to win the district, you must win more votes than any other party contesting the area. Not all districts have the same number of voters, and like in many other places, how the electoral boundaries are drawn and what they supposedly signify is a complete mystery. All I know is that they change every election, and my house has been in a different district in every election.
 
 What is unique however, is that there are districts which gives more than one seat. These are known as Group Representation Councils (GRCs). Instead of electing a single candidate, you have to pick a group of three or more of them. Normal districts that give a party only one seat are called Single Member Constituencies (SMCs).
 
-This little problem is based on the goals outlined broadly in:
-http://dontneedsex.blogspot.sg/2013/05/how-to-become-next-government-of.html
+This little problem is based on the goals outlined broadly in [1].
+
+Unlike some other esteemed bloggers [2], this piece is also intended to be a humorous social commentary. It is also intended to be educational, and an introduction to combinatorial algorithmic problems and algorithmic thinking in general.
 
 PROBLEM DEFINITION
 
-You are given an electoral map, the map consists of districts:
-As a lazy party you are interested only in a few facts about each district, largely: 
-The number of voters and the number of seats each district has.
+At the beginning of the elections, you are given an electoral map, and the map consists of a set D of districts of size N. 
 
-You want to form the government, so you need a simple majority of seats.
+You are interested only in a few facts about each district, largely: 
+v - The number of voters in each district, and w - the number of seats each district has.
+
+So each district d_i can be defined as a tuple (v, w). This will form the basis to the inputs to our problems.
+
+If you wish to form the government, so you need a simple majority of seats.
 
 There are a couple of additional constraints:
-1) You either win the entire district or you don't. You can't win half a district.
-2) If you win a district, you can only do it at most once.
+C1) You either win the entire district or you don't. You can't win half a district.
+C2) If you win a district, you can only do it at most once.
 
-You are lazy, so you wish to put in less effort. Now, this is vaguely defined, but for now, let's just say you want to minimize the number
-of districts you contest. We will talk about the other 'tougher' objective minimization measure later.
+The above two constraints mean that there are 2^N combinations of districts that you can win. N, as stated above is the number of districts.
 
-The obvious solution to minimizing the number of districts contested is to go for a greedy approach. Just pick the districts with the most seats first and progressively fill it in with smaller and smaller districts until the threshold for government formation is reached.
+Knowing the above facts, we can now begin to define a number of problems.
 
-This algorithm should be optimal.
+Your party is lazy, so you wish to put in less effort. Now, this is vaguely defined, but for now, let's just say you want to minimize the number of districts you contest because maybe filling in the form to contest in EC is hard work to you. This problem can be referred to as the district-minimization problem. This problem is much simpler to solve than the vote minimization problem which we will define later.
 
-A more challenging problem would be to minimize the number of votes you have to win. For this you need to introduce a cost function.
+To define an algorithmic problem, you typically need two things, inputs and outputs. There are usually constraints that your solution must conform to. For optimization problems, there is also an objective you want to accomplish.
+
+Formally for the district-minimization problem (MINDISTRICT),
+
+Inputs: 
+A set D of districts, of size N.
+A set W of seats, of size N, where w_i in W is the number of seats allocated to a district d_i in D.
+T, the threshold of the minimum number of seats we wish to win.
+
+Output:
+A set S of size M which signifies the set of districts won by the party, S is a subset of D. 
+
+Constraints:
+Constraints C1 and C2 apply to this problem.
+In addition we have the following constraint C3, for every district won s_i in set S, we add the corresponding weight w_i to our total number of seats SUM (w_i) >= T
+
+Objective: 
+Minimize M, the number of districts won, while meeting all constraints.
+
+A Solution for District Minimization
+
+An obvious solution to minimizing the number of districts won is to go for a greedy approach. Create a list of districts sorted by descending**  order of number of seats. Go through the sorted list, adding districts to S and add w_i to a running total r, when r >= T, stop and output S.
+
+The greedy algorithm is of complexity O (nlogn) because of the sorting step. n is the number of districts.
+
+This greedy algorithm is provably optimal for this problem. How do we know this? Will we resort to testing, generating all combinations and finding a counter example against the algorithm? Leaving aside the number of combinations is exponential to the number of districts, what if the electoral boundaries change like they do every election, huh? What if Singapore suddenly decides to colonize the moon, and there are a few districts up there that we need to win next election? Does our testing prove that it is true in all possible cases? No? So we will take the easier path and resort to proving our algorithm correct in all cases instead.
+
+Here's a sketch of proof: Suppose not, then there must exist some set T that is smaller than S. For such a set to exist, then there must exist some w_i + w_j for some d_i and d_j in S that can be replaced by w_k for some d_k in T (and d_k is in D but not in S) such that the C3 is still fulfilled. To fulfil this condition w_k >= w_i + w_j and for this condition to hold true w_k >= w_i and w_k >= w_j . However since d_i is added to S in descending order of w, any w_k >= w_i and w_k >= w_j will also be in S, resulting in a contradiction.
+
+A Tougher Problem (MINVOTE)
+
+A more challenging problem would be to minimize the number of votes you have to win. For this you need to introduce a cost function to each district. The cost function will be a function of our information available, the number of voters.
+
+Our party is lazy, but not stupid, and we wish to guarantee a win. A first past the post system requires a simple majority of votes to win. Now, our party is aware of the existence of more than two parties contesting, but it has considered that more parties means the votes will be split more, so a worst case scenario would be two parties contesting in each district. Let us take the number of votes required to win in a two party scenario to be exactly half of all voters plus one. Votes are discrete and indivisible so let's make the cost function floor (0.5 * v_i + 1).
+
+We now have enough information to formally define this problem.
+
+Inputs: 
+A set D of districts, of size N.
+A set W of seats, of size N, where w_i in W is the number of seats allocated to a district d_i in D.
+T, the threshold of the minimum number of seats we wish to win.
+A set V of votes, of size N, where v_i in V is the number of voters in district d_i in D.
+
+Output:
+A set S of size M which signifies the set of districts won by the party, S is a subset of D. 
+
+Constraints:
+Constraints C1 and C2 apply to this problem.
+In addition, Constraint C3 from MINDISTRICT also applies.
+
+We have a cost function cost(v_i) that takes the number of voters in each district to output the cost c_i of each district. The function is as defined earlier: c_i = floor (0.5 * v_i + 1)
+
+Objective: 
+
+We want to minimize the votes required to win so....
+Minimize SUM (c_i), where c_i is the cost corresponding to d_i for all d_i in S.
+
+A Brute-Force Algorithm for MINVOTE
+
+There is an old saying, when in doubt, use brute-force. A brute-force algorithm tries all combinations and tests them against each other. The solution produced by such an algorithm is guaranteed to be correct because the entire solution space is explored. For small datasets this algorithm is feasible, but for this problem grows exponentially to the number of districts in the input.
+
+A Greedy Algorithm for MINVOTE
+
+Those who are familiar with algorithmic computer science might have heard of the 0-1 knapsack problem. One of the common proposed but nonoptimal solutions involve sorting the input by (w_i / v_i). A similar approach might be taken in this case.
+
+There is no guarantee that the greedy algorithm will be optimal for all cases. It is possible for the EC to release an electoral map where this algorithm fails. It does however, produces an optimal solution for the 2011 electoral boundaries, as can be seen in here [2].
+
+A Dynamic Programming Algorithm for MINVOTE
+
+Recurrence relation.
+
+TODO
+
+The complexity of the Dynamic Programming solution is O(NT).
+
+TODO
+
+IMPLEMENTATION 
+
+For the dataset I will steal the 2011 GRC boundaries from [3]. I will trust that this data is correct.
+
+TODO
+
+RESULTS
+
+TODO
+
+EXERCISES (because educational value)
+
+How would you modify the problem definitions if the party wishes to win at least two-thirds majority?
+
+Consider the issue of spoilt votes. How does this affect our problem definition and analysis?
+
+Suppose our party is friendly but too lazy to walk around and canvass voters, and thus we wish to minimize the distance we need to walk around to get votes. Assume that each district has their candidates walking around so there is no need to travel between districts. Suppose you have a cost function that takes in a district and outputs the distance you need to walk to win instead for MINWALK, how would you solve MINWALK? Remember, your party is lazy but very inclined towards computer science.
+
+How is the problem MINDISTRICT related to MINVOTE? 
+
+FOOTNOTES
+
+** I don't want to hear any nitpicking about non-ascending, because nobody ever uses that stupid word in literature and we all understand what 'descending' actually means, okay? 
+
+REFERENCES
+
+[1] http://dontneedsex.blogspot.sg/2013/05/how-to-become-next-government-of.html
+[2] http://minvotes.blogspot.sg/2013/05/minimum-votes-needed.html
+[3] http://dontneedsex.blogspot.sg/2013/05/revised-code-for-calculating-minimum_11.html
